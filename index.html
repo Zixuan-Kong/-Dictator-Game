@@ -37,51 +37,51 @@
     <h1>Dictator Game</h1>
     
     <div class="container">
-        <h2>连接钱包</h2>
-        <button id="connectBtn">连接MetaMask</button>
-        <p id="accountDisplay">未连接</p>
+        <h2>Connect Wallet</h2>
+        <button id="connectBtn">Connect MetaMask</button>
+        <p id="accountDisplay">Not connected</p>
     </div>
     
     <div class="container">
-        <h2>创建游戏</h2>
+        <h2>Create Game</h2>
         <div>
-            <label>玩家B地址: <input type="text" id="playerBInput" placeholder="0x..." size="42"></label>
+            <label>Player B Address: <input type="text" id="playerBInput" placeholder="0x..." size="42"></label>
         </div>
         <div>
-            <label>金额(ETH): <input type="number" id="amountInput" min="0.001" step="0.001" value="0.01"></label>
+            <label>Amount (ETH): <input type="number" id="amountInput" min="0.001" step="0.001" value="0.01"></label>
         </div>
-        <button id="createBtn">创建游戏</button>
+        <button id="createBtn">Create Game</button>
         <p id="createStatus"></p>
     </div>
     
     <div class="container">
-        <h2>游戏交互</h2>
+        <h2>Game Interaction</h2>
         <div>
-            <label>合约地址: <input type="text" id="contractInput" placeholder="0x..." size="42"></label>
-            <button id="loadBtn">加载游戏</button>
+            <label>Contract Address: <input type="text" id="contractInput" placeholder="0x..." size="42"></label>
+            <button id="loadBtn">Load Game</button>
         </div>
         <div id="gameInfo" style="display:none;">
-            <h3>游戏信息</h3>
-            <p>玩家A: <span id="playerADisplay"></span></p>
-            <p>玩家B: <span id="playerBDisplay"></span></p>
-            <p>金额: <span id="amountDisplay"></span> ETH</p>
-            <p>状态: <span id="statusDisplay"></span></p>
+            <h3>Game Info</h3>
+            <p>Player A: <span id="playerADisplay"></span></p>
+            <p>Player B: <span id="playerBDisplay"></span></p>
+            <p>Amount: <span id="amountDisplay"></span> ETH</p>
+            <p>Status: <span id="statusDisplay"></span></p>
             
             <div id="playerAPanel" style="display:none;">
-                <h3>分配资金</h3>
-                <label>给玩家B的金额: <input type="number" id="splitInput" min="0" step="0.001" value="0"></label>
-                <p>您将得到: <span id="keepDisplay">0</span> ETH</p>
-                <button id="splitBtn">确认分配</button>
+                <h3>Allocate Funds</h3>
+                <label>Amount for Player B: <input type="number" id="splitInput" min="0" step="0.001" value="0"></label>
+                <p>You will keep: <span id="keepDisplay">0</span> ETH</p>
+                <button id="splitBtn">Confirm Allocation</button>
             </div>
             
             <div id="playerBPanel" style="display:none;">
-                <h3>等待玩家A决定</h3>
-                <p>请等待玩家A决定资金分配方式。</p>
+                <h3>Waiting for Player A</h3>
+                <p>Please wait for Player A to decide how to allocate the funds.</p>
             </div>
             
             <div id="completedPanel" style="display:none;">
-                <h3>游戏已完成</h3>
-                <p>资金已自动转入各方钱包。</p>
+                <h3>Game Completed</h3>
+                <p>Funds have been automatically transferred to the respective wallets.</p>
             </div>
         </div>
         <p id="gameStatus"></p>
@@ -114,26 +114,26 @@
                     web3 = new Web3(window.ethereum);
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     currentAccount = accounts[0];
-                    document.getElementById('accountDisplay').innerHTML = `已连接: <span class="success">${currentAccount}</span>`;
+                    document.getElementById('accountDisplay').innerHTML = `Connected: <span class="success">${currentAccount}</span>`;
                     
                     // 账户切换监听
                     window.ethereum.on('accountsChanged', function (accounts) {
                         currentAccount = accounts[0];
-                        document.getElementById('accountDisplay').innerHTML = `已连接: <span class="success">${currentAccount}</span>`;
+                        document.getElementById('accountDisplay').innerHTML = `Connected: <span class="success">${currentAccount}</span>`;
                         updateGameDisplay();
                     });
                 } catch (error) {
-                    document.getElementById('accountDisplay').innerHTML = `<span class="error">连接失败: ${error.message}</span>`;
+                    document.getElementById('accountDisplay').innerHTML = `<span class="error">Connection failed: ${error.message}</span>`;
                 }
             } else {
-                document.getElementById('accountDisplay').innerHTML = `<span class="error">请安装MetaMask</span>`;
+                document.getElementById('accountDisplay').innerHTML = `<span class="error">Please install MetaMask</span>`;
             }
         });
 
         // 创建游戏
         document.getElementById('createBtn').addEventListener('click', async () => {
             if (!web3) {
-                document.getElementById('createStatus').innerHTML = `<span class="error">请先连接钱包</span>`;
+                document.getElementById('createStatus').innerHTML = `<span class="error">Please connect your wallet first</span>`;
                 return;
             }
             
@@ -141,12 +141,12 @@
             const amount = document.getElementById('amountInput').value;
             
             if (!web3.utils.isAddress(playerB)) {
-                document.getElementById('createStatus').innerHTML = `<span class="error">无效的地址</span>`;
+                document.getElementById('createStatus').innerHTML = `<span class="error">Invalid address</span>`;
                 return;
             }
             
             try {
-                document.getElementById('createStatus').innerHTML = `<span class="success">创建中，请确认交易...</span>`;
+                document.getElementById('createStatus').innerHTML = `<span class="success">Creating game, please confirm transaction...</span>`;
                 
                 const GameContract = new web3.eth.Contract(contractABI);
                 const gas = await web3.eth.getGasPrice();
@@ -162,17 +162,17 @@
                 });
                 
                 deployTx.on('error', (error) => {
-                    document.getElementById('createStatus').innerHTML = `<span class="error">创建失败: ${error.message}</span>`;
+                    document.getElementById('createStatus').innerHTML = `<span class="error">Creation failed: ${error.message}</span>`;
                 });
                 
                 const newContract = await deployTx;
                 
-                document.getElementById('createStatus').innerHTML = `<span class="success">游戏已创建: ${newContract.options.address}</span>`;
+                document.getElementById('createStatus').innerHTML = `<span class="success">Game created: ${newContract.options.address}</span>`;
                 document.getElementById('contractInput').value = newContract.options.address;
                 loadGame(newContract.options.address);
                 
             } catch (error) {
-                document.getElementById('createStatus').innerHTML = `<span class="error">创建失败: ${error.message}</span>`;
+                document.getElementById('createStatus').innerHTML = `<span class="error">Creation failed: ${error.message}</span>`;
             }
         });
 
@@ -180,7 +180,7 @@
         document.getElementById('loadBtn').addEventListener('click', async () => {
             const address = document.getElementById('contractInput').value;
             if (!web3.utils.isAddress(address)) {
-                document.getElementById('gameStatus').innerHTML = `<span class="error">无效的合约地址</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="error">Invalid contract address</span>`;
                 return;
             }
             
@@ -194,7 +194,7 @@
                 document.getElementById('gameInfo').style.display = 'block';
                 document.getElementById('gameStatus').innerHTML = '';
             } catch (error) {
-                document.getElementById('gameStatus').innerHTML = `<span class="error">加载失败: ${error.message}</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="error">Loading failed: ${error.message}</span>`;
             }
         }
 
@@ -203,18 +203,18 @@
             const playerBAmount = document.getElementById('splitInput').value;
             
             try {
-                document.getElementById('gameStatus').innerHTML = `<span class="success">提交分配决定...</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="success">Submitting allocation decision...</span>`;
                 
                 await gameContract.methods.split(web3.utils.toWei(playerBAmount, 'ether')).send({
                     from: currentAccount,
                     gas: 200000
                 });
                 
-                document.getElementById('gameStatus').innerHTML = `<span class="success">分配成功！资金已自动转账。</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="success">Allocation successful! Funds have been automatically transferred.</span>`;
                 await updateGameDisplay();
                 
             } catch (error) {
-                document.getElementById('gameStatus').innerHTML = `<span class="error">分配失败: ${error.message}</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="error">Allocation failed: ${error.message}</span>`;
             }
         });
 
@@ -240,7 +240,7 @@
                 document.getElementById('playerADisplay').innerText = playerA;
                 document.getElementById('playerBDisplay').innerText = playerB;
                 document.getElementById('amountDisplay').innerText = amount;
-                document.getElementById('statusDisplay').innerText = finished ? '已完成' : '进行中';
+                document.getElementById('statusDisplay').innerText = finished ? 'Completed' : 'In Progress';
                 
                 document.getElementById('splitInput').max = amount;
                 
@@ -262,12 +262,12 @@
                         document.getElementById('playerAPanel').style.display = 'none';
                         document.getElementById('playerBPanel').style.display = 'none';
                         document.getElementById('completedPanel').style.display = 'none';
-                        document.getElementById('gameStatus').innerHTML = `<span class="info">您不是此游戏的参与者</span>`;
+                        document.getElementById('gameStatus').innerHTML = `<span class="info">You are not a participant in this game</span>`;
                     }
                 }
                 
             } catch (error) {
-                document.getElementById('gameStatus').innerHTML = `<span class="error">获取游戏状态失败: ${error.message}</span>`;
+                document.getElementById('gameStatus').innerHTML = `<span class="error">Failed to get game status: ${error.message}</span>`;
             }
         }
     </script>
